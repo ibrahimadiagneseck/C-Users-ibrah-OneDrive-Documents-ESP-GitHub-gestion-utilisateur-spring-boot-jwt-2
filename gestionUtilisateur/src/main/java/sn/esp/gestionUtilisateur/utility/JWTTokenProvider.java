@@ -34,11 +34,11 @@ import static sn.esp.gestionUtilisateur.constant.SecurityConstant.TOKEN_CANNOT_B
 @Component
 public class JWTTokenProvider {
 
-//	@Value("${jwt.secret}") // fichier yml
-//	private String secret;
+	@Value("${jwt.secret}") // fichier yml
+	private String secret;
 	
 	
-	private String secret = "[a-zA-Z0-9._]^+$Guidelines89797987forAlphabeticalArraNumeralsandOtherSymbo$";
+//	private String secret = "[a-zA-Z0-9._]^+$Guidelines89797987forAlphabeticalArraNumeralsandOtherSymbo$";
 	
 
 	public String generateJwtToken(UserPrincipal userPrincipal) {
