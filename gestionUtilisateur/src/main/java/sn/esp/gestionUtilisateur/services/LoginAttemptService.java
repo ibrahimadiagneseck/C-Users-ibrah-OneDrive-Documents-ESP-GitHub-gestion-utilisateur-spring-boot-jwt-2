@@ -1,4 +1,4 @@
-package sn.esp.gestionUtilisateur.services.impl;
+package sn.esp.gestionUtilisateur.services;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -25,18 +25,28 @@ public class LoginAttemptService {
                 });
     }
 
-    public void evictUserLoginAttemptCache(String username) { // supprimer la cle : username
+    public void evictUserFromLoginAttemptCache(String username) { // supprimer la cle : username
         loadingAttemptCache.invalidate(username);
     }
 
-    public void addUserToLoginAttemptCache(String username) throws ExecutionException {
+    public void addUserToLoginAttemptCache(String username) {
         int attempts = 0;
 
-        attempts = ATTEMPTS_INCREMENT + loadingAttemptCache.get(username);
+        try {
+            attempts = ATTEMPTS_INCREMENT + loadingAttemptCache.get(username);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
         loadingAttemptCache.put(username, attempts); // ajouter au cache
     }
 
-    public boolean hasExceededMaxAttempts(String username) throws ExecutionException {
-        return loadingAttemptCache.get(username) >= MAXIMUM_NUMBER_OF_ATTEMPTS;
+    public boolean hasExceededMaxAttempts(String username) {
+        try {
+            return loadingAttemptCache.get(username) >= MAXIMUM_NUMBER_OF_ATTEMPTS;
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

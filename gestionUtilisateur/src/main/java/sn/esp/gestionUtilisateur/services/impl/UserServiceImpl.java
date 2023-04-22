@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -51,6 +52,7 @@ import jakarta.transaction.Transactional;
 import sn.esp.gestionUtilisateur.entities.User;
 import sn.esp.gestionUtilisateur.entities.UserPrincipal;
 import sn.esp.gestionUtilisateur.repositories.UserRepository;
+import sn.esp.gestionUtilisateur.services.LoginAttemptService;
 import sn.esp.gestionUtilisateur.services.UserService;
 
 
@@ -65,12 +67,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private UserRepository userRepository;
     
     private BCryptPasswordEncoder passwordEncoder;
-//    private LoginAttemptService loginAttemptService;
+    private LoginAttemptService loginAttemptService;
 //    private EmailService emailService;
 
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.loginAttemptService = loginAttemptService;
     }
     
 //    @Autowired
@@ -92,8 +95,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new UsernameNotFoundException(NO_USER_FOUND_BY_USERNAME + username);
             
         } else {
-        	
-            //validateLoginAttempt(user);
+
+            validateLoginAttempt(user); // verifier le cache : tentative de connexion
             user.setLastLoginDateDisplay(user.getLastLoginDate());
             user.setLastLoginDate(new Date());
             userRepository.save(user);
@@ -258,17 +261,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return RandomStringUtils.randomNumeric(10);
     }
 
-//    private void validateLoginAttempt(User user) {
-//        if(user.isNotLocked()) {
-//            if(loginAttemptService.hasExceededMaxAttempts(user.getUsername())) {
-//                user.setNotLocked(false);
-//            } else {
-//                user.setNotLocked(true);
-//            }
-//        } else {
-//            loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
-//        }
-//    }
+    private void validateLoginAttempt(User user) {
+
+        if(user.isNotLocked()) {
+            if(loginAttemptService.hasExceededMaxAttempts(user.getUsername())) {
+                user.setNotLocked(false);
+            } else {
+                user.setNotLocked(true);
+            }
+        } else {
+            loginAttemptService.evictUserFromLoginAttemptCache(user.getUsername());
+        }
+    }
 
     private User validateNewUsernameAndEmail(String currentUsername, String newUsername, String newEmail) throws UserNotFoundException, UsernameExistException, EmailExistException {
         
