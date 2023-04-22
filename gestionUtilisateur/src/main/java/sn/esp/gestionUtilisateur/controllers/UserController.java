@@ -35,6 +35,8 @@ import sn.esp.gestionUtilisateur.exception.entities.UsernameExistException;
 import sn.esp.gestionUtilisateur.services.UserService;
 import sn.esp.gestionUtilisateur.utility.JWTTokenProvider;
 
+import javax.mail.MessagingException;
+
 
 @RestController
 @RequestMapping(path = { "/", "/user"})
@@ -73,7 +75,7 @@ public class UserController extends ExceptionHandling {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) throws UserNotFoundException, UsernameExistException, EmailExistException{ //, MessagingException {
+    public ResponseEntity<User> register(@RequestBody User user) throws UserNotFoundException, UsernameExistException, EmailExistException, MessagingException {
         User newUser = userService.register(user.getFirstName(), user.getLastName(), user.getUsername(), user.getEmail());
         return new ResponseEntity<>(newUser, OK);
     }
