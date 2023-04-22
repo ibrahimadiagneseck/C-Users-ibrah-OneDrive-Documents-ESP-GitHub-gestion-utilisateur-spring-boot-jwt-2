@@ -24,7 +24,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -52,8 +51,11 @@ import jakarta.transaction.Transactional;
 import sn.esp.gestionUtilisateur.entities.User;
 import sn.esp.gestionUtilisateur.entities.UserPrincipal;
 import sn.esp.gestionUtilisateur.repositories.UserRepository;
+import sn.esp.gestionUtilisateur.services.EmailService;
 import sn.esp.gestionUtilisateur.services.LoginAttemptService;
 import sn.esp.gestionUtilisateur.services.UserService;
+
+import javax.mail.MessagingException;
 
 
 @Service
@@ -62,27 +64,20 @@ import sn.esp.gestionUtilisateur.services.UserService;
 public class UserServiceImpl implements UserService, UserDetailsService {
 
 	private Logger LOGGER = LoggerFactory.getLogger(getClass());
-	
-	@Autowired
+
     private UserRepository userRepository;
-    
     private BCryptPasswordEncoder passwordEncoder;
     private LoginAttemptService loginAttemptService;
-//    private EmailService emailService;
+    private EmailService emailService;
 
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService) {
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.loginAttemptService = loginAttemptService;
+        this.emailService = emailService;
     }
-    
-//    @Autowired
-//    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, LoginAttemptService loginAttemptService, EmailService emailService) {
-//        this.userRepository = userRepository;
-//        this.passwordEncoder = passwordEncoder;
-//        this.loginAttemptService = loginAttemptService;
-//        this.emailService = emailService;
-//    }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -102,13 +97,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             userRepository.save(user);
             UserPrincipal userPrincipal = new UserPrincipal(user);
             LOGGER.info(FOUND_USER_BY_USERNAME + username);
-            
+
             return userPrincipal;
         }
     }
 
     @Override
-    public User register(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistException, EmailExistException{//, MessagingException {
+    public User register(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistException, EmailExistException, MessagingException {
         
     	validateNewUsernameAndEmail(EMPTY, username, email);
     	
@@ -130,8 +125,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setProfileImageUrl(getTemporaryProfileImageUrl(username));
         
         userRepository.save(user);
-        LOGGER.info("New user password: " + password);
-        //emailService.sendNewPasswordEmail(firstName, password, email);
+        LOGGER.info("New user password: " + password); // à commenter
+        emailService.sendNewPasswordEmail(firstName, password, email);
         
         return user;
     }

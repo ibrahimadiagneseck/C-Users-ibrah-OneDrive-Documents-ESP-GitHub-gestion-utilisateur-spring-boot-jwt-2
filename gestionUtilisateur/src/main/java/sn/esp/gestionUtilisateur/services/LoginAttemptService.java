@@ -25,7 +25,7 @@ public class LoginAttemptService {
                 });
     }
 
-    public void evictUserFromLoginAttemptCache(String username) { // supprimer la cle : username
+    public void evictUserFromLoginAttemptCache(String username) { // supprimer la cle : username, ou adresse IP à bloquer par exemple
         loadingAttemptCache.invalidate(username);
     }
 

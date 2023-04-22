@@ -7,7 +7,6 @@ import sn.esp.gestionUtilisateur.services.LoginAttemptService;
 
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutionException;
 
 @Component
 public class AuthenticationFailureListener {

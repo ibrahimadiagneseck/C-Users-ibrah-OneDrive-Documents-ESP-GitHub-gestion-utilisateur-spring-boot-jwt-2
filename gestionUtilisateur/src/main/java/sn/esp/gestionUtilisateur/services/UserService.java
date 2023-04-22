@@ -10,10 +10,12 @@ import sn.esp.gestionUtilisateur.exception.entities.EmailExistException;
 import sn.esp.gestionUtilisateur.exception.entities.UserNotFoundException;
 import sn.esp.gestionUtilisateur.exception.entities.UsernameExistException;
 
+import javax.mail.MessagingException;
+
 
 public interface UserService {
 
-	User register(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistException, EmailExistException;//, MessagingException;
+	User register(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistException, EmailExistException, MessagingException;//, MessagingException;
 
     List<User> getUsers();
 
