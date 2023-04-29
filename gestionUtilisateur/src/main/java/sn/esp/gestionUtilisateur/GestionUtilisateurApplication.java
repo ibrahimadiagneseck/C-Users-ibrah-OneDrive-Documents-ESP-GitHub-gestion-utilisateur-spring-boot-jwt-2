@@ -1,6 +1,7 @@
 package sn.esp.gestionUtilisateur;
 
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -12,12 +13,16 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import static sn.esp.gestionUtilisateur.constant.FileConstant.USER_FOLDER;
+
 
 @SpringBootApplication
 public class GestionUtilisateurApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GestionUtilisateurApplication.class, args);
+
+		new File(USER_FOLDER).mkdirs(); // creer un dossier à chaque demarrage
 	}
 
 	@Bean

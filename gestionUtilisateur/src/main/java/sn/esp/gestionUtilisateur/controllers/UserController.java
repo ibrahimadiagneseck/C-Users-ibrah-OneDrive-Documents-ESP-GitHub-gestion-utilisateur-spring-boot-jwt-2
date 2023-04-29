@@ -30,6 +30,7 @@ import sn.esp.gestionUtilisateur.entities.User;
 import sn.esp.gestionUtilisateur.entities.UserPrincipal;
 import sn.esp.gestionUtilisateur.exception.ExceptionHandling;
 import sn.esp.gestionUtilisateur.exception.entities.EmailExistException;
+import sn.esp.gestionUtilisateur.exception.entities.NotAnImageFileException;
 import sn.esp.gestionUtilisateur.exception.entities.UserNotFoundException;
 import sn.esp.gestionUtilisateur.exception.entities.UsernameExistException;
 import sn.esp.gestionUtilisateur.services.UserService;
@@ -44,21 +45,17 @@ public class UserController extends ExceptionHandling {
 	
 	public static final String EMAIL_SENT = "An email with a new password was sent to: ";
     public static final String USER_DELETED_SUCCESSFULLY = "User deleted successfully";
-    
-    @Autowired
+
     private AuthenticationManager authenticationManager;
-    
-    @Autowired
     private UserService userService;
-    
-    @Autowired
     private JWTTokenProvider jwtTokenProvider;
 
-//    public UserController(AuthenticationManager authenticationManager, UserService userService, JWTTokenProvider jwtTokenProvider) {
-//        this.authenticationManager = authenticationManager;
-//        this.userService = userService;
-//        this.jwtTokenProvider = jwtTokenProvider;
-//    }
+    @Autowired
+    public UserController(AuthenticationManager authenticationManager, UserService userService, JWTTokenProvider jwtTokenProvider) {
+        this.authenticationManager = authenticationManager;
+        this.userService = userService;
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
     @PostMapping("/login")
     public HttpHeaders login(@RequestBody User user) {
@@ -88,7 +85,7 @@ public class UserController extends ExceptionHandling {
                                            @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNonLocked") String isNonLocked,
-                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException{//, NotAnImageFileException {
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {//, NotAnImageFileException {
         User newUser = userService.addNewUser(firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
@@ -102,7 +99,7 @@ public class UserController extends ExceptionHandling {
                                        @RequestParam("role") String role,
                                        @RequestParam("isActive") String isActive,
                                        @RequestParam("isNonLocked") String isNonLocked,
-                                       @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException{//, NotAnImageFileException {
+                                       @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {//, NotAnImageFileException {
         User updatedUser = userService.updateUser(currentUsername, firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(updatedUser, OK);
     }
