@@ -3,6 +3,8 @@ package sn.esp.gestionUtilisateur.controllers;
 import static org.springframework.http.HttpStatus.OK;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 
@@ -23,16 +25,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
+import static sn.esp.gestionUtilisateur.constant.FileConstant.FORWARD_SLASH;
+import static sn.esp.gestionUtilisateur.constant.FileConstant.USER_FOLDER;
 import static sn.esp.gestionUtilisateur.constant.SecurityConstant.*;
 
 import sn.esp.gestionUtilisateur.entities.HttpResponse;
 import sn.esp.gestionUtilisateur.entities.User;
 import sn.esp.gestionUtilisateur.entities.UserPrincipal;
 import sn.esp.gestionUtilisateur.exception.ExceptionHandling;
-import sn.esp.gestionUtilisateur.exception.entities.EmailExistException;
-import sn.esp.gestionUtilisateur.exception.entities.NotAnImageFileException;
-import sn.esp.gestionUtilisateur.exception.entities.UserNotFoundException;
-import sn.esp.gestionUtilisateur.exception.entities.UsernameExistException;
+import sn.esp.gestionUtilisateur.exception.entities.*;
 import sn.esp.gestionUtilisateur.services.UserService;
 import sn.esp.gestionUtilisateur.utility.JWTTokenProvider;
 
@@ -42,8 +44,8 @@ import javax.mail.MessagingException;
 @RestController
 @RequestMapping(path = { "/", "/user"})
 public class UserController extends ExceptionHandling {
-	
-	public static final String EMAIL_SENT = "An email with a new password was sent to: ";
+
+    public static final String EMAIL_SENT = "An email with a new password was sent to: ";
     public static final String USER_DELETED_SUCCESSFULLY = "User deleted successfully";
 
     private AuthenticationManager authenticationManager;
@@ -59,8 +61,8 @@ public class UserController extends ExceptionHandling {
 
     @PostMapping("/login")
     public HttpHeaders login(@RequestBody User user) {
-    	
-    	
+
+
         authenticate(user.getUsername(), user.getPassword()); // verrifications
         
         User loginUser = userService.findUserByUsername(user.getUsername());
@@ -85,7 +87,8 @@ public class UserController extends ExceptionHandling {
                                            @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNonLocked") String isNonLocked,
-                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {//, NotAnImageFileException {
+                                           @RequestParam(value = "profileImage", required = false) MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException, NotAnImageFileException {
+
         User newUser = userService.addNewUser(firstName, lastName, username,email, role, Boolean.parseBoolean(isNonLocked), Boolean.parseBoolean(isActive), profileImage);
         return new ResponseEntity<>(newUser, OK);
     }
@@ -116,11 +119,11 @@ public class UserController extends ExceptionHandling {
         return new ResponseEntity<>(users, OK);
     }
 
-//    @GetMapping("/resetpassword/{email}")
-//    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws MessagingException, EmailNotFoundException {
-//        userService.resetPassword(email);
-//        return response(OK, EMAIL_SENT + email);
-//    }
+    @GetMapping("/resetpassword/{email}")
+    public ResponseEntity<HttpResponse> resetPassword(@PathVariable("email") String email) throws MessagingException, EmailNotFoundException {
+        userService.resetPassword(email);
+        return response(OK, EMAIL_SENT + email);
+    }
 
     @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAnyAuthority('user:delete')")
@@ -129,22 +132,25 @@ public class UserController extends ExceptionHandling {
         return response(OK, USER_DELETED_SUCCESSFULLY);
     }
 
-//    @PostMapping("/updateProfileImage")
-//    public ResponseEntity<User> updateProfileImage(@RequestParam("username") String username, @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
-//        User user = userService.updateProfileImage(username, profileImage);
-//        return new ResponseEntity<>(user, OK);
-//    }
+    @PostMapping("/updateProfileImage")
+    public ResponseEntity<User> updateProfileImage(@RequestParam("username") String username, @RequestParam(value = "profileImage") MultipartFile profileImage) throws UserNotFoundException, UsernameExistException, EmailExistException, IOException, NotAnImageFileException {
+        User user = userService.updateProfileImage(username, profileImage);
+        return new ResponseEntity<>(user, OK);
+    }
 
-//    @GetMapping(path = "/image/{username}/{fileName}", produces = IMAGE_JPEG_VALUE)
-//    public byte[] getProfileImage(@PathVariable("username") String username, @PathVariable("fileName") String fileName) throws IOException {
-//        return Files.readAllBytes(Paths.get(USER_FOLDER + username + FORWARD_SLASH + fileName));
-//    }
+
+    @GetMapping(path = "/image/{username}/{fileName}", produces = IMAGE_JPEG_VALUE) // produces = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
+    public byte[] getProfileImage(@PathVariable("username") String username, @PathVariable("fileName") String fileName) throws IOException {
+        return Files.readAllBytes(Paths.get(USER_FOLDER + username + FORWARD_SLASH + fileName));
+    }
 
 
 
     private ResponseEntity<HttpResponse> response(HttpStatus httpStatus, String message) {
-        return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(),
-                message), httpStatus);
+        return new ResponseEntity<>(
+                new HttpResponse(httpStatus.value(), httpStatus, httpStatus.getReasonPhrase().toUpperCase(), message),
+                httpStatus
+        );
     }
     
     private HttpHeaders getJwtHeader(UserPrincipal user) {
@@ -164,11 +170,11 @@ public class UserController extends ExceptionHandling {
 
 
 //    private HttpHeaders getJwtHeader(UserPrincipal user) {
-//    	
+//
 //        HttpHeaders headers = new HttpHeaders();
-//        
+//
 //        headers.add(JWT_TOKEN_HEADER, jwtTokenProvider.generateJwtToken(user));
-//        
+//
 //        return headers;
 //    }
 
