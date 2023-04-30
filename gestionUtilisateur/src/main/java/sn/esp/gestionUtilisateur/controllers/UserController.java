@@ -2,7 +2,11 @@ package sn.esp.gestionUtilisateur.controllers;
 
 import static org.springframework.http.HttpStatus.OK;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -26,8 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
-import static sn.esp.gestionUtilisateur.constant.FileConstant.FORWARD_SLASH;
-import static sn.esp.gestionUtilisateur.constant.FileConstant.USER_FOLDER;
+import static sn.esp.gestionUtilisateur.constant.FileConstant.*;
 import static sn.esp.gestionUtilisateur.constant.SecurityConstant.*;
 
 import sn.esp.gestionUtilisateur.entities.HttpResponse;
@@ -142,6 +145,23 @@ public class UserController extends ExceptionHandling {
     @GetMapping(path = "/image/{username}/{fileName}", produces = IMAGE_JPEG_VALUE) // produces = {IMAGE_JPEG_VALUE, IMAGE_PNG_VALUE})
     public byte[] getProfileImage(@PathVariable("username") String username, @PathVariable("fileName") String fileName) throws IOException {
         return Files.readAllBytes(Paths.get(USER_FOLDER + username + FORWARD_SLASH + fileName));
+    }
+
+    @GetMapping(path = "/image/profile/{username}", produces = IMAGE_JPEG_VALUE)
+    public byte[] getProfileImage(@PathVariable("username") String username) throws IOException {
+
+        URL url = new URL(TEMP_PROFILE_IMAGE_BASE_URL + username);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        try (InputStream inputStream = url.openStream()) {
+            int bytesRead;
+            byte[] chunk = new byte[1024]; // morceau de lecture des bites (donnees)
+            while((bytesRead = inputStream.read(chunk)) > 0) {
+                byteArrayOutputStream.write(chunk, 0, bytesRead); // chunk, a partir de 0, taille
+            }
+        }
+
+        return byteArrayOutputStream.toByteArray();
     }
 
 
