@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,6 +30,7 @@ import sn.esp.gestionUtilisateur.filter.JwtAuthorizationFilter;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // pour le controller : @PreAuthorize("hasAnyAuthority('user:delete')")
 public class SecurityConfiguration {
 
     AuthenticationManager authenticationManager;
@@ -53,22 +55,20 @@ public class SecurityConfiguration {
         this.userDetailsService = userDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
-    
+
+
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
       return config.getAuthenticationManager();
     }
     
 
-//    @Bean
-//    PasswordEncoder passwordEncoder() {
-//      return new BCryptPasswordEncoder();
-//    }
 
-    @Bean
-    Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
-        return builder -> builder.featuresToEnable(JsonParser.Feature.ALLOW_COMMENTS);
-    }
+
+//    @Bean
+//    Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {
+//        return builder -> builder.featuresToEnable(JsonParser.Feature.ALLOW_COMMENTS);
+//    }
 
     public BCryptPasswordEncoder getbCryptPasswordEncoder() {
 		return bCryptPasswordEncoder;
