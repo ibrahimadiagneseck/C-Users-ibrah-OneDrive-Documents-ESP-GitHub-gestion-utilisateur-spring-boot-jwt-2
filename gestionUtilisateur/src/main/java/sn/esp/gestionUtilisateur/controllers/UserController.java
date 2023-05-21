@@ -67,7 +67,6 @@ public class UserController extends ExceptionHandling {
 //
 //        HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
 //
-//        // jwtHeader.add("user", loginUser.toString());
 //
 //        return jwtHeader;
 //    }
@@ -82,8 +81,6 @@ public class UserController extends ExceptionHandling {
         UserPrincipal userPrincipal = new UserPrincipal(loginUser);
 
         HttpHeaders jwtHeader = getJwtHeader(userPrincipal);
-
-        // jwtHeader.add("user", loginUser.toString());
 
         return ResponseEntity.ok().headers(jwtHeader).body(loginUser);
     }
