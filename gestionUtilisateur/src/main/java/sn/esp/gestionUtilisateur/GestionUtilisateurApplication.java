@@ -17,7 +17,7 @@ import static sn.esp.gestionUtilisateur.constant.FileConstant.USER_FOLDER;
 
 
 @SpringBootApplication
-public class GestionUtilisateurApplication {
+	public class GestionUtilisateurApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(GestionUtilisateurApplication.class, args);
